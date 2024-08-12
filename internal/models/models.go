@@ -26,4 +26,6 @@ type Application struct {
 type TodoServiceInterface interface {
 	InsertTodo(TodoPayload) error
 	GetTodos() ([]primitive.M, error)
+	DeleteTodo(string) error
+	UpdateTodo(string, TodoPayload) error
 }

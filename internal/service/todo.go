@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/zhetkerbaevan/study-mongodb/internal/models"
@@ -67,4 +69,37 @@ func (s *TodoService) GetTodos() ([]primitive.M, error) {
 	}
 
 	return todos, nil
+}
+
+func (s *TodoService) DeleteTodo(task string) error {
+	collection := returnCollectionPointer()
+	filter := bson.D{{"task", task}}
+
+	res, err := collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Result from Deleting", res.DeletedCount)
+
+	return nil
+}
+
+func (s *TodoService) UpdateTodo(id string, todo models.TodoPayload) error {
+	collection := returnCollectionPointer()
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("INVAILD ID FORMAT: %w", err)
+	}
+	filter := bson.D{{"_id", objID}}
+
+	update := bson.D{{"$set", bson.D{{"completed", todo.Completed}}}}
+
+	res, err := collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Result from updating", res.ModifiedCount)
+	return nil
 }
